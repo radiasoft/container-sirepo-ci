@@ -14,5 +14,7 @@ build_as_run_user() {
     cd ~
     git clone https://github.com/radiasoft/sirepo.git
     cd sirepo
-    npm install -g $(jq -M -r '.devDependencies | keys | @tsv' package.json)
+    local -a d=( $(jq -M -r '.devDependencies | keys | map(. + "@") | @tsv' package.json) )
+    local -a v=( $(jq -M -r '[.devDependencies[]] | @tsv' package.json) )
+    npm install -g $(for i in "${!d[@]}"; do printf " %s%s" "${d[$i]}" "${v[$i]}"; done)
 }
