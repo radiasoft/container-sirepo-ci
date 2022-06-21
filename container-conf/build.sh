@@ -10,11 +10,8 @@ build_as_root() {
 }
 
 build_as_run_user() {
-    umask 022
-    cd ~
-    git clone https://github.com/radiasoft/sirepo.git
-    cd sirepo
-    local -a d=( $(jq -M -r '.devDependencies | keys | map(. + "@") | @tsv' package.json) )
-    local -a v=( $(jq -M -r '[.devDependencies[]] | @tsv' package.json) )
-    npm install -g $(for i in "${!d[@]}"; do printf " %s%s" "${d[$i]}" "${v[$i]}"; done)
+    install_url radiasoft/sirepo
+    #POSIT: This relies on the fact that individual package names don't have spaces or special chars
+    npm install -g \
+        $(install_download package.json | jq -r '.devDependencies | to_entries | map("\(.key)@\(.value)") | .[]')
 }
